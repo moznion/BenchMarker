@@ -46,7 +46,9 @@ class BenchMarker
         $time_nop = $this->runLoop($count, $nop); // TODO cache it
         $time_code = $this->runLoop($count, $code);
 
-        return $this->timeDiff($time_nop, $time_code);
+        $result = $this->timeDiff($time_nop, $time_code);
+        $result->count = $count;
+        return $result;
     }
 
     public function countIt($time, callable $code)
@@ -223,26 +225,129 @@ class BenchMarker
         return $results;
     }
 
-    public function cmpThese ($count, array $codes) {
+    public function cmpThese($count, array $codes)
+    {
         $results = $this->timeThese($count, $codes);
 
-        foreach (array_keys($results) as $key) {
+        $rates = [];
+        $titles = array_keys($results);
+        foreach ($titles as $title) {
             $elapsed = null;
-            switch($this->style_name) {
+            $result = $results[$title];
+            switch ($this->style_name) {
                 case 'nop':
-                    $elapsed = $results[$key]->getChildCPUTime();
+                    $elapsed = $result->getChildCPUTime();
                     break;
                 case 'noc':
-                    $elapsed = $results[$key]->getParentCPUTime();
+                    $elapsed = $result->getParentCPUTime();
                     break;
                 default:
-                    $elapsed = $results[$key]->getAllCPUTime();
+                    $elapsed = $result->getAllCPUTime();
             }
 
-            var_dump($results[$key]);
-            //$rate = $_->[6] / (($elapsed) + 0.000000000000001);
-            //$_->[7] = $rate;
+            $rates[$title] = $result->count / ($elapsed + 0.000000000000001);
         }
+
+        $display_as_rate = false;
+        if ($rates) {
+            $_rates = $rates;
+            sort($_rates);
+            $display_as_rate = $_rates[(count($_rates) - 1) >> 1] > 1;
+        }
+
+        $rows = [];
+        $col_widths = [];
+
+        $top_row = ['', $display_as_rate ? 'Rate' : 's/iter'];
+        foreach ($titles as $title) {
+            array_push($top_row, $title);
+        }
+
+        array_push($rows, $top_row);
+
+        foreach ($top_row as $column) {
+            array_push($col_widths, strlen($column));
+        }
+
+        foreach ($titles as $row_title) {
+            $row = [];
+
+            array_push($row, $row_title);
+
+            if (strlen($row_title) > $col_widths[0]) {
+                $col_widths[0] = strlen($row_title);
+            }
+
+            $result = $results[$row_title];
+
+            $row_rate = $rates[$row_title];
+            $rate = $display_as_rate ? $row_rate : 1 / $row_rate;
+
+            if ($rate >= 100) {
+                $format = "%0.0f";
+            } elseif ($rate >= 10) {
+                $format = "%0.1f";
+            } elseif ($rate >= 1) {
+                $format = "%0.2f";
+            } elseif ($rate >= 0.1) {
+                $format = "%0.3f";
+            } else {
+                $format = "%0.2e";
+            }
+
+            if ($display_as_rate) {
+                $format .= "/s";
+            }
+
+            $formatted_rate = sprintf($format, $rate);
+            array_push($row, $formatted_rate);
+
+            if (strlen($formatted_rate) > $col_widths[1]) {
+                $col_widths[1] = strlen($formatted_rate);
+            }
+
+            $skip_rest = false;
+            $col_num = 2;
+            foreach ($titles as $col_title) {
+                $out = '';
+                if ($col_title === $row_title) {
+                    $out = "--";
+                } else {
+                    $col_rate = $rates[$col_title];
+                    $out = sprintf("%.0f%%", 100 * $row_rate / $col_rate - 100);
+                }
+
+                array_push($row, $out);
+
+                if (strlen($out) > $col_widths[$col_num]) {
+                    $col_widths[$col_num] = strlen($out);
+                }
+
+                if (strlen($row[0]) > $col_widths[$col_num]) {
+                    $col_widths[$col_num] = strlen($row[0]);
+                }
+
+                $col_num++;
+            }
+
+            array_push($rows, $row);
+        }
+
+        if ($this->style_name === "None") {
+            return $rows;
+        }
+
+        for ($i = 0; $i < count($rows); $i++) {
+            $row = $rows[$i];
+            $str = '';
+            for ($j = 0; $j < count($row); $j++) {
+                $width = $col_widths[$j];
+                $str .= sprintf("%{$width}s  ", $row[$j]);
+            }
+            echo "{$str}\n";
+        }
+
+        return $rows;
     }
 
     /**
