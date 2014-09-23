@@ -1,8 +1,11 @@
 <?php
 
-namespace Benchmarker;
+namespace Moznion;
 
-class Benchmarker
+use \Moznion\BenchMarker\Time as Time;
+use \Moznion\BenchMarker\Style as Style;
+
+class BenchMarker
 {
     // public $do_cache = false;
     // private $cache = array();
@@ -52,7 +55,7 @@ class Benchmarker
         $time = $this->n_to_for($time);
 
         if ($time < $min_for) {
-            die("countit($time, ...): timelimit cannot be less than $min_for.\n");
+            die("countit({$time}, ...): timelimit cannot be less than {$min_for}.\n");
         }
 
         $tc = null;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Benchmarker\Style;
+namespace Moznion\BenchMarker\Style;
 
 trait TimeString {
     public function spewNocTimeString($real_time, $user_time, $sys_time, $parent_cpu_time) {

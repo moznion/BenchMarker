@@ -1,6 +1,6 @@
 <?php
 
-namespace Benchmarker;
+namespace Moznion\BenchMarker;
 
 class Time
 {
@@ -25,11 +25,11 @@ class Time
         $usage = getrusage();
         $child_usage = getrusage(1);
 
-        $sys_time = $usage["ru_stime.tv_usec"];
-        $user_time = $usage["ru_utime.tv_usec"];
+        $sys_time = $usage["ru_stime.tv_usec"] / 1000000.0;
+        $user_time = $usage["ru_utime.tv_usec"] / 1000000.0;
 
-        $child_sys_time = $child_usage["ru_stime.tv_usec"];
-        $child_user_time = $child_usage["ru_utime.tv_usec"];
+        $child_sys_time = $child_usage["ru_stime.tv_usec"] / 1000000.0;
+        $child_user_time = $child_usage["ru_utime.tv_usec"] / 1000000.0;
 
         return new Time($time, $sys_time, $user_time, $child_sys_time, $child_user_time);
     }

@@ -1,12 +1,10 @@
 <?php
 
-namespace Benchmarker\Style;
+namespace Moznion\BenchMarker\Style;
 
-use \Benchmarker\Style as Style;
+use \Moznion\BenchMarker\Style as Style;
 
-class All extends Style {
-    use TimeString;
-
+class Nop extends Style {
     public function say ($str) {
         print $str;
     }
@@ -21,13 +19,14 @@ class All extends Style {
         $parent_cpu_time,
         $child_cpu_time
     ) {
-        return $this->spewAllTimeString(
+        $f = $this->format;
+
+        return sprintf(
+            "%2g wallclock secs (%$f cusr + %$f csys = %$f CPU)",
             $real_time,
-            $user_time,
-            $sys_time,
             $child_user_time,
             $child_sys_time,
-            $all_cpu_time
+            $child_cpu_time
         );
     }
 }

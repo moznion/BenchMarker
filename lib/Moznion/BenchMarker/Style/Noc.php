@@ -1,8 +1,8 @@
 <?php
 
-namespace Benchmarker\Style;
+namespace Moznion\BenchMarker\Style;
 
-use \Benchmarker\Style as Style;
+use \Moznion\BenchMarker\Style as Style;
 
 class Noc extends Style {
     use TimeString;

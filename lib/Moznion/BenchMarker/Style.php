@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ta_kawakami
- * Date: 9/23/14
- * Time: 6:01 PM
- */
 
-namespace Benchmarker;
+namespace Moznion\BenchMarker;
 
 abstract class Style {
     protected $format;
@@ -21,7 +15,7 @@ abstract class Style {
      * @return Style
      */
     public static function createStyle ($style, $format) {
-        $class = '\Benchmarker\Style\\' . ucfirst($style);
+        $class = "\\Moznion\\BenchMarker\\Style\\" . ucfirst($style);
         if (!class_exists($class)) {
             die("Style is not supported ($style)");
         }
