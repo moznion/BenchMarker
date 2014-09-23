@@ -9,6 +9,7 @@ class Time
     public $user_time;
     public $child_sys_time;
     public $child_user_time;
+    public $count = 0;
 
     public function __construct($time, $sys_time, $user_time, $child_sys_time, $child_user_time)
     {

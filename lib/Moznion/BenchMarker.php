@@ -70,7 +70,7 @@ class BenchMarker
             if ($tc <= 0 and $n > 1024) {
                 $diff = $this->timeDiff($t0, $t1);
                 if ($diff->user_time + $diff->sys_time > 8 || ++$cnt > 16) {
-                    die("Timing is consistently zero in estimation loop, cannot benchmark. N=$n");
+                    die("Timing is consistently zero in estimation loop, cannot benchmark. N={$n}\n");
                 }
             } else {
                 $cnt = 0;
@@ -84,7 +84,7 @@ class BenchMarker
         $nmin = $n;
         $time_practice = 0.1 * $time;
         while ($tc < $time_practice) {
-            $n = (int)$time_practice * 1.05 * $n / $tc;
+            $n = (int)($time_practice * 1.05 * $n / $tc);
             $td = $this->timeIt($n, $code);
             $new_tc = $td->user_time + $td->sys_time;
 
@@ -98,7 +98,7 @@ class BenchMarker
         $child_sys_time_total = 0.0;
         $child_user_time_total = 0.0;
 
-        $n = (int)$n * (1.05 * $time / $tc);
+        $n = (int)($n * (1.05 * $time / $tc));
         $cnt = 0;
         while (1) {
             $td = $this->timeIt($n, $code);
@@ -125,8 +125,8 @@ class BenchMarker
 
             $time_total = $time_total < 0.01 ? 0.01 : $time_total;
 
-            $r = $time / $time_total - 1;
-            $n = (int)$r * $n_total;
+            $rate = $time / $time_total - 1;
+            $n = (int)($rate * $n_total);
             $n = $n < $nmin ? $nmin : $n;
         }
 
@@ -137,10 +137,13 @@ class BenchMarker
             $child_sys_time_total,
             $child_user_time_total
         );
-        return [$result, $n_total];
+
+        $result->count = $n_total;
+
+        return $result;
     }
 
-    public function timethis($count, callable $code, $title = null)
+    public function timeThis($count, callable $code, $title = null)
     {
         $forn = null;
         if ($count > 0) {
@@ -154,8 +157,8 @@ class BenchMarker
             }
         } else {
             $fort = $this->nToFor($count);
-            $result_time = $this->countIt($fort, $code);
-            $forn = $result_time[-1];
+            $result_time = $this->countIt($count, $code);
+            $forn = $result_time->count;
 
             if (is_null($title)) {
                 $title = "timethis $fort";
@@ -165,7 +168,7 @@ class BenchMarker
         $style = $this->style;
         $style->say(sprintf("%10s: ", $title));
 
-        print $this->timeStr($result_time, null, null, $forn) . "\n";
+        print $this->timeStr($result_time, $forn) . "\n";
 
         if (
             $forn < $this->min_count ||
@@ -178,6 +181,11 @@ class BenchMarker
         return $result_time;
     }
 
+    /**
+     * @param $count
+     * @param array $codes
+     * @return Time[]
+     */
     public function timeThese($count, array $codes)
     {
         $style = $this->style;
@@ -210,9 +218,31 @@ class BenchMarker
             if (!is_callable($code)) {
                 die("Value of codes must be callable");
             }
-            $results[$name] = $this->timethis($count, $code, $name, $style);
+            $results[$name] = $this->timeThis($count, $code, $name, $style);
         }
         return $results;
+    }
+
+    public function cmpThese ($count, array $codes) {
+        $results = $this->timeThese($count, $codes);
+
+        foreach (array_keys($results) as $key) {
+            $elapsed = null;
+            switch($this->style_name) {
+                case 'nop':
+                    $elapsed = $results[$key]->getChildCPUTime();
+                    break;
+                case 'noc':
+                    $elapsed = $results[$key]->getParentCPUTime();
+                    break;
+                default:
+                    $elapsed = $results[$key]->getAllCPUTime();
+            }
+
+            var_dump($results[$key]);
+            //$rate = $_->[6] / (($elapsed) + 0.000000000000001);
+            //$_->[7] = $rate;
+        }
     }
 
     /**
@@ -243,7 +273,7 @@ class BenchMarker
         $time_string = "";
         $elapsed = $all_cpu_time;
 
-        $style->spewTimeString(
+        $time_string = $style->spewTimeString(
             $real_time,
             $user_time,
             $sys_time,
