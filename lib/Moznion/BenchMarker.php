@@ -18,7 +18,7 @@ class BenchMarker
     private $style_name;
     private $format;
 
-    public function __construct($style_name=null, $format=null)
+    public function __construct($style_name = null, $format = null)
     {
         $this->format = $format;
         if (is_null($this->format)) {
@@ -37,22 +37,22 @@ class BenchMarker
      * @param callable $code
      * @return Time
      */
-    public function timeit($count, callable $code)
+    public function timeIt($count, callable $code)
     {
         $nop = function () {
             // NOP
         };
 
-        $time_nop = $this->runloop($count, $nop); // TODO cache it
-        $time_code = $this->runloop($count, $code);
+        $time_nop = $this->runLoop($count, $nop); // TODO cache it
+        $time_code = $this->runLoop($count, $code);
 
-        return $this->timediff($time_nop, $time_code);
+        return $this->timeDiff($time_nop, $time_code);
     }
 
-    public function countit($time, callable $code)
+    public function countIt($time, callable $code)
     {
         $min_for = 0.1;
-        $time = $this->n_to_for($time);
+        $time = $this->nToFor($time);
 
         if ($time < $min_for) {
             die("countit({$time}, ...): timelimit cannot be less than {$min_for}.\n");
@@ -62,13 +62,13 @@ class BenchMarker
         $cnt = 0;
         for ($n = 1; ; $n *= 2) {
             $t0 = Time::getNow();
-            $td = $this->timeit($n, $code);
+            $td = $this->timeIt($n, $code);
             $t1 = Time::getNow();
 
             $tc = $td->user_time + $td->sys_time;
 
             if ($tc <= 0 and $n > 1024) {
-                $diff = $this->timediff($t0, $t1);
+                $diff = $this->timeDiff($t0, $t1);
                 if ($diff->user_time + $diff->sys_time > 8 || ++$cnt > 16) {
                     die("Timing is consistently zero in estimation loop, cannot benchmark. N=$n");
                 }
@@ -85,7 +85,7 @@ class BenchMarker
         $time_practice = 0.1 * $time;
         while ($tc < $time_practice) {
             $n = (int)$time_practice * 1.05 * $n / $tc;
-            $td = $this->timeit($n, $code);
+            $td = $this->timeIt($n, $code);
             $new_tc = $td->user_time + $td->sys_time;
 
             $tc = $new_tc > 1.2 * $tc ? $new_tc : 1.2 * $tc;
@@ -101,7 +101,7 @@ class BenchMarker
         $n = (int)$n * (1.05 * $time / $tc);
         $cnt = 0;
         while (1) {
-            $td = $this->timeit($n, $code);
+            $td = $this->timeIt($n, $code);
 
             $n_total += $n;
             $real_time_total += $td->real_time;
@@ -147,14 +147,14 @@ class BenchMarker
             if ((int)$count < $count) {
                 die("non-integer loop count $count, stopped");
             }
-            $result_time = $this->timeit($count, $code);
+            $result_time = $this->timeIt($count, $code);
 
             if (is_null($title)) {
                 $title = "timethis $count";
             }
         } else {
-            $fort = $this->n_to_for($count);
-            $result_time = $this->countit($fort, $code);
+            $fort = $this->nToFor($count);
+            $result_time = $this->countIt($fort, $code);
             $forn = $result_time[-1];
 
             if (is_null($title)) {
@@ -165,7 +165,7 @@ class BenchMarker
         $style = $this->style;
         $style->say(sprintf("%10s: ", $title));
 
-        print $this->timestr($result_time, null, null, $forn) . "\n";
+        print $this->timeStr($result_time, null, null, $forn) . "\n";
 
         if (
             $forn < $this->min_count ||
@@ -178,7 +178,7 @@ class BenchMarker
         return $result_time;
     }
 
-    public function timethese($count, array $codes)
+    public function timeThese($count, array $codes)
     {
         $style = $this->style;
 
@@ -191,7 +191,7 @@ class BenchMarker
             $style->say("timing $count iterations of");
         } else {
             $style->say("running");
-            $for = $this->n_to_for($count);
+            $for = $this->nToFor($count);
             if ($count > 1) {
                 $style->say(", each");
             }
@@ -220,7 +220,7 @@ class BenchMarker
      * @param null $count
      * @return string
      */
-    public function timestr(Time $time_result, $count = null)
+    public function timeStr(Time $time_result, $count = null)
     {
         $style = $this->style;
         $style_name = $this->style_name;
@@ -266,7 +266,8 @@ class BenchMarker
         return $time_string;
     }
 
-    public function timediff(Time $t1, Time $t2) {
+    public function timeDiff(Time $t1, Time $t2)
+    {
         return $t2->getDiff($t1);
     }
 
@@ -275,7 +276,7 @@ class BenchMarker
      * @param callable $code
      * @return Time
      */
-    private function runloop($count, callable $code)
+    private function runLoop($count, callable $code)
     {
         if ($count < 0) {
             die("negative loop count: $count");
@@ -300,10 +301,10 @@ class BenchMarker
 
         $t1 = Time::getNow();
 
-        return $this->timediff($t0, $t1);
+        return $this->timeDiff($t0, $t1);
     }
 
-    private function n_to_for($n)
+    private function nToFor($n)
     {
         if ($n === 0) {
             return $this->default_for;
