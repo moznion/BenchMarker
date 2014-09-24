@@ -1,5 +1,16 @@
 {
-    "autoload": {
+    "name": "moznion/benchmarker",
+    "description": "",
+    "keywords": ["benchmark"],
+    "type": "library",
+    "homepage": "https://github.com/moznion/BenchMarker",
+    "license": "",
+    "authors": [
+        {
+            "name": "moznion",
+            "email": "moznion@gmail.com"
+        }
+    ],    "autoload": {
         "psr-0": {"": "lib/"}
     }
 }
