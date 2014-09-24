@@ -10,7 +10,8 @@
             "name": "moznion",
             "email": "moznion@gmail.com"
         }
-    ],    "autoload": {
+    ],
+    "autoload": {
         "psr-0": {"": "lib/"}
     }
 }
