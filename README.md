@@ -38,7 +38,7 @@ Creates the instance of BenchMarker.
 
 Specify the name of style. Default value is `auto`.
 
-Please see also [Style](/moznion/BenchMarker#style).
+Please see also [Style](https://github.com/moznion/BenchMarker#style).
 
 - `$format`
 
@@ -51,7 +51,7 @@ Default value is '5.2f'.
 
 Run a chunk of code and see how long it goes.
 
-This method returns [instance of result-time](/moznion/BenchMarker#result-time).
+This method returns [instance of result-time](https://github.com/moznion/BenchMarker#result-time).
 
 - `$count`
 
@@ -65,7 +65,7 @@ This method returns [instance of result-time](/moznion/BenchMarker#result-time).
 
 See how many times a chunk of code runs in a given time.
 
-This method returns [instance of result-time](/moznion/BenchMarker#result-time).
+This method returns [instance of result-time](https://github.com/moznion/BenchMarker#result-time).
 
 - `$time`
 
@@ -79,7 +79,7 @@ This method returns [instance of result-time](/moznion/BenchMarker#result-time).
 
 Run a chunk of code several times and print result of benchmark.
 
-This method returns [instance of result-time](/moznion/BenchMarker#result-time).
+This method returns [instance of result-time](https://github.com/moznion/BenchMarker#result-time).
 
 - `$count`
 
@@ -101,7 +101,7 @@ Title of result. `$title` defaults to "timethis $count".
 
 Run several chunks of code several times and print result of benchmark.
 
-This method returns [instance of result-time](/moznion/BenchMarker#result-time) of array for each codes..
+This method returns [instance of result-time](https://github.com/moznion/BenchMarker#result-time) of array for each codes.
 
 - `$count`
 
@@ -137,7 +137,7 @@ Print formatted time.
 
 - `$time_result`
 
-[instance of result-time](/moznion/BenchMarker#result-time).
+[instance of result-time](https://github.com/moznion/BenchMarker#result-time).
 
 - `$count`
 
@@ -147,7 +147,7 @@ Number of loops. If this argument is not null then this method appends the rate.
 
 Calculates difference between `$new_time` and `$old_time`.
 
-Arguments must be [instance of result-time](/moznion/BenchMarker#result-time).
+Arguments must be [instance of result-time](https://github.com/moznion/BenchMarker#result-time).
 
 Result Time
 -----------
@@ -211,7 +211,7 @@ PHP (version 5.4 or later)
 See Also
 --------
 
-- [examples](/moznion/BenchMarker/eg)
+- [examples](https://github.com/moznion/BenchMarker/tree/master/eg)
 - [Benchmark](http://perldoc.perl.org/Benchmark.html)
 
 Notes
