@@ -1,5 +1,4 @@
-BenchMarker
-===========
+#BenchMarker [![Build Status](https://travis-ci.org/moznion/BenchMarker.svg)](https://travis-ci.org/moznion/BenchMarker)
 
 Benchmark running times of PHP code
 
