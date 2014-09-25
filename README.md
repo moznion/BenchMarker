@@ -204,6 +204,10 @@ Output nothing.
 
 If child processes CPU time is bigger than 0 then this style is the same as "all". Elsewise, this style is the same as "noc".
 
+Requires
+--------
+
+PHP (version 5.4 or later)
 
 See Also
 --------
