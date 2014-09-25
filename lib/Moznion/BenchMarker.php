@@ -7,9 +7,6 @@ use \Moznion\BenchMarker\Style as Style;
 
 class BenchMarker
 {
-    // public $do_cache = false;
-    // private $cache = array();
-
     private $min_count = 4;
     private $min_cpu = 0.4;
     private $default_for = 3;
@@ -18,6 +15,10 @@ class BenchMarker
     private $style_name;
     private $format;
 
+    /**
+     * @param null $style_name
+     * @param null $format
+     */
     public function __construct($style_name = null, $format = null)
     {
         $this->format = $format;
@@ -51,13 +52,23 @@ class BenchMarker
         return $result;
     }
 
+    /**
+     * @param $time
+     * @param callable $code
+     * @return Time
+     */
     public function countIt($time, callable $code)
     {
         $min_for = 0.1;
-        $time = $this->nToFor($time);
+
+        if ($time === 0) {
+            $time = $this->default_for;
+        } elseif ($time < 0) {
+            $time = -$time;
+        }
 
         if ($time < $min_for) {
-            die("countit({$time}, ...): timelimit cannot be less than {$min_for}.\n");
+            die("countIt({$time}, ...): time limit cannot be less than {$min_for}.\n");
         }
 
         $tc = null;
@@ -145,6 +156,12 @@ class BenchMarker
         return $result;
     }
 
+    /**
+     * @param $count
+     * @param callable $code
+     * @param null $title
+     * @return Time
+     */
     public function timeThis($count, callable $code, $title = null)
     {
         $forn = null;
@@ -155,7 +172,7 @@ class BenchMarker
             $result_time = $this->timeIt($count, $code);
 
             if (is_null($title)) {
-                $title = "timethis $count";
+                $title = "timeThis $count";
             }
         } else {
             $fort = $this->nToFor($count);
@@ -163,7 +180,7 @@ class BenchMarker
             $forn = $result_time->count;
 
             if (is_null($title)) {
-                $title = "timethis $fort";
+                $title = "timeThis $fort";
             }
         }
 
@@ -186,10 +203,15 @@ class BenchMarker
     /**
      * @param $count
      * @param array $codes
-     * @return Time[]
+     * @param null $quiet
+     * @return array
      */
-    public function timeThese($count, array $codes)
+    public function timeThese($count, array $codes, $quiet = null)
     {
+        $original_style = $this->style;
+        if (! is_null($quiet)) {
+            $this->style = Style::createStyle('none', $this->format);
+        }
         $style = $this->style;
 
         $style->say("Benchmark: ");
@@ -220,14 +242,22 @@ class BenchMarker
             if (!is_callable($code)) {
                 die("Value of codes must be callable");
             }
-            $results[$name] = $this->timeThis($count, $code, $name, $style);
+            $results[$name] = $this->timeThis($count, $code, $name);
         }
+
+        $this->style = $original_style;
+
         return $results;
     }
 
+    /**
+     * @param $count
+     * @param array $codes
+     * @return array
+     */
     public function cmpThese($count, array $codes)
     {
-        $results = $this->timeThese($count, $codes);
+        $results = $this->timeThese($count, $codes, true);
 
         $rates = [];
         $titles = array_keys($results);
@@ -278,8 +308,6 @@ class BenchMarker
                 $col_widths[0] = strlen($row_title);
             }
 
-            $result = $results[$row_title];
-
             $row_rate = $rates[$row_title];
             $rate = $display_as_rate ? $row_rate : 1 / $row_rate;
 
@@ -306,10 +334,8 @@ class BenchMarker
                 $col_widths[1] = strlen($formatted_rate);
             }
 
-            $skip_rest = false;
             $col_num = 2;
             foreach ($titles as $col_title) {
-                $out = '';
                 if ($col_title === $row_title) {
                     $out = "--";
                 } else {
@@ -375,7 +401,6 @@ class BenchMarker
 
         $f = $this->format;
 
-        $time_string = "";
         $elapsed = $all_cpu_time;
 
         $time_string = $style->spewTimeString(
@@ -401,6 +426,11 @@ class BenchMarker
         return $time_string;
     }
 
+    /**
+     * @param Time $t1
+     * @param Time $t2
+     * @return Time
+     */
     public function timeDiff(Time $t1, Time $t2)
     {
         return $t2->getDiff($t1);
@@ -439,6 +469,10 @@ class BenchMarker
         return $this->timeDiff($t0, $t1);
     }
 
+    /**
+     * @param $n
+     * @return int|null
+     */
     private function nToFor($n)
     {
         if ($n === 0) {
