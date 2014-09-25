@@ -101,7 +101,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
         $row = $result[0];
         $this->assertEquals("", $row[0]);
-        $this->assertEquals("Rate", $row[1]);
+        $this->assertEquals(true, preg_match('/(?:Rate|s\/iter)/', $row[1]));
         $this->assertEquals("code A", $row[2]);
         $this->assertEquals("code B", $row[3]);
 
@@ -126,7 +126,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
             array_push($table_rows, $message);
         }
 
-        $this->assertEquals(true, preg_match('/^\s+Rate\s+code A\s+code B\s+$/', $table_rows[0]));
+        $this->assertEquals(true, preg_match('/^\s+(?:Rate|s\/iter)\s+code A\s+code B\s+$/', $table_rows[0]));
         $this->assertEquals(true, preg_match('/^\s*code A  \d+\/s\s+--\s+-?\d+%\s+$/', $table_rows[1]));
         $this->assertEquals(true, preg_match('/^\s*code B  \d+\/s\s+-?\d+%\s+--\s+$/', $table_rows[2]));
     }
