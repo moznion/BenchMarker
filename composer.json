@@ -1,17 +1,21 @@
 {
     "name": "moznion/benchmarker",
-    "description": "",
+    "description": "Benchmark running times of PHP code",
     "keywords": ["benchmark"],
     "type": "library",
     "homepage": "https://github.com/moznion/BenchMarker",
-    "license": "",
+    "license": "MIT",
     "authors": [
         {
             "name": "moznion",
             "email": "moznion@gmail.com"
         }
     ],
+    "require-dev": {
+        "phpunit/phpunit": "4.2.*"
+    },
     "autoload": {
         "psr-0": {"": "lib/"}
     }
 }
+
