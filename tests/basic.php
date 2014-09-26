@@ -21,7 +21,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
     public function testCountIt()
     {
         $func = function () {
-            for ($i = 0; $i < 100; $i++) {
+            $str = "";
+            for ($i = 0; $i < 1000; $i++) {
+                $str .= "AAAAA";
             }
         };
 
@@ -48,7 +50,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(true, $result instanceof Moznion\BenchMarker\Time);
 
-        $this->assertEquals(true, preg_match('/^timeThis 1: [0-9.e\-]+ wallclock secs \(.+\)$/', $message));
+        $this->assertEquals(true, preg_match('/^timeThis 1:  ?[0-9.e\-]+ wallclock secs \(.+\)$/', $message));
         if ($warning_message) {
             $this->assertEquals(true, preg_match('/^\s+\(warning: too few iterations for a reliable count\)$/', $warning_message));
         }
@@ -76,8 +78,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(true, preg_match('/^Benchmark: timing 1 iterations of code A, code B...$/', $messages[0]));
 
         $num_of_msg = 0;
+
         foreach ($messages as $message) {
-            if (preg_match('/^\s+code [AB]: [0-9.e\-]+ wallclock secs \(.+\)$/', $message)) {
+            if (preg_match('/^\s+code [AB]:  ?[0-9.e\-]+ wallclock secs \(.+\)$/', $message)) {
                 $num_of_msg++;
             }
         }
@@ -107,13 +110,13 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
         $row = $result[1];
         $this->assertEquals("code A", $row[0]);
-        $this->assertEquals(true, preg_match('/^\d+\/s$/', $row[1]));
+        $this->assertEquals(true, preg_match('/^(?:\d+\/s|[0-9.e\-]+)$/', $row[1]));
         $this->assertEquals("--", $row[2]);
         $this->assertEquals(true, preg_match('/^-?\d+%$/', $row[3]));
 
         $row = $result[2];
         $this->assertEquals("code B", $row[0]);
-        $this->assertEquals(true, preg_match('/^\d+\/s$/', $row[1]));
+        $this->assertEquals(true, preg_match('/^(?:\d+\/s|[0-9.e\-]+)$/', $row[1]));
         $this->assertEquals(true, preg_match('/^-?\d+%$/', $row[2]));
         $this->assertEquals("--", $row[3]);
 
@@ -127,8 +130,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
         }
 
         $this->assertEquals(true, preg_match('/^\s+(?:Rate|s\/iter)\s+code A\s+code B\s+$/', $table_rows[0]));
-        $this->assertEquals(true, preg_match('/^\s*code A  \d+\/s\s+--\s+-?\d+%\s+$/', $table_rows[1]));
-        $this->assertEquals(true, preg_match('/^\s*code B  \d+\/s\s+-?\d+%\s+--\s+$/', $table_rows[2]));
+        $this->assertEquals(true, preg_match('/^\s*code A   ?(?:\d+\/s|[0-9.e\-]+)\s+--\s+-?\d+%\s+$/', $table_rows[1]));
+        $this->assertEquals(true, preg_match('/^\s*code B   ?(?:\d+\/s|[0-9.e\-]+)\s+-?\d+%\s+--\s+$/', $table_rows[2]));
     }
 }
 
