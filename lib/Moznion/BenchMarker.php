@@ -190,8 +190,12 @@ class BenchMarker
         print $this->timeStr($result_time, $forn) . "\n";
 
         if (
-            $forn < $this->min_count ||
-            ($result_time->real_time < 1 && $forn < 1000) ||
+            (!is_null($forn) &&
+                (
+                    $forn < $this->min_count ||
+                    ($result_time->real_time < 1 && $forn < 1000)
+                )
+            ) ||
             $result_time->getAllCPUTime() < $this->min_cpu
         ) {
             print "            (warning: too few iterations for a reliable count)\n";
