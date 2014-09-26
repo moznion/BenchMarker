@@ -2,7 +2,7 @@
 
 Benchmark running times of PHP code
 
-Synopssis
+Synopsis
 ---------
 
 ```php
