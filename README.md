@@ -12,12 +12,26 @@ $code = function () use ($foo) {
     // do something
 };
 
+$benchmarker->timeThese(10000, [
+    "code A" => function () use ($bar) {
+        // do something
+    },
+    "code B" => $code, // it can also take variable of anonymous function
+]);
+// Sample of Output:
+//    code A: 3.9326 wallclock secs (3sr + 0.2562ys = PU)
+//    code B: 6.40877 wallclock secs (6sr + 0.81337ys = PU)
+
 $benchmarker->cmpThese(10000, [
     "code A" => function () use ($bar) {
         // do something
     },
     "code B" => $code, // it can also take variable of anonymous function
 ]);
+// Sample of Output:
+//               Rate  code A  code B
+//    code A  22571/s      --    -49%
+//    code B  44656/s     98%      --
 ```
 
 Description
