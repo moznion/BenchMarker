@@ -26,11 +26,11 @@ class Time
         $usage = getrusage();
         $child_usage = getrusage(1);
 
-        $sys_time = $usage["ru_stime.tv_usec"] / 1000000.0;
-        $user_time = $usage["ru_utime.tv_usec"] / 1000000.0;
+        $sys_time = sprintf("%d.%f", $usage["ru_stime.tv_sec"], $usage["ru_stime.tv_usec"]);
+        $user_time = sprintf("%d.%f", $usage["ru_utime.tv_sec"], $usage["ru_utime.tv_usec"]);
 
-        $child_sys_time = $child_usage["ru_stime.tv_usec"] / 1000000.0;
-        $child_user_time = $child_usage["ru_utime.tv_usec"] / 1000000.0;
+        $child_sys_time = sprintf("%d.%f", $child_usage["ru_stime.tv_sec"], $child_usage["ru_stime.tv_usec"]);
+        $child_user_time = sprintf("%d.%f", $child_usage["ru_utime.tv_sec"], $child_usage["ru_utime.tv_usec"]);
 
         return new Time($time, $sys_time, $user_time, $child_sys_time, $child_user_time);
     }
