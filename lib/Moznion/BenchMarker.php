@@ -82,6 +82,13 @@ class BenchMarker
 
             if ($tc <= 0 and $n > 1024) {
                 $diff = $this->timeDiff($t0, $t1);
+
+                // note that $diff is the total CPU time taken to call timeIt(),
+                // while $tc is is difference in CPU secs between the empty run
+                // and the code run. If the code is trivial, its possible
+                // for $diff to get large while $tc is still zero (or slightly
+                // negative). Bail out once timeIt() starts taking more than a
+                // few seconds without noticeable difference.
                 if ($diff->user_time + $diff->sys_time > 8 || ++$cnt > 16) {
                     die("Timing is consistently zero in estimation loop, cannot benchmark. N={$n}\n");
                 }
@@ -95,15 +102,23 @@ class BenchMarker
         }
 
         $nmin = $n;
-        $time_practice = 0.1 * $time;
+
+        // Get $n high enough that we can guess the final $n with some accuracy.
+        $time_practice = 0.1 * $time; // Target/time practice.
         while ($tc < $time_practice) {
+            // The 5% fudge is to keep us from iterating again all
+            // that often (this speeds overall responsiveness when $time is big
+            // and we guess a little low). This does not noticeably affect
+            // accuracy since we're not counting these times.
             $n = (int)($time_practice * 1.05 * $n / $tc);
             $td = $this->timeIt($n, $code);
             $new_tc = $td->user_time + $td->sys_time;
 
+            // Make sure we are making progress.
             $tc = $new_tc > 1.2 * $tc ? $new_tc : 1.2 * $tc;
         }
 
+        // Now, do the 'for real' timing(s), repeating until we exceed the max.
         $n_total = 0;
         $real_time_total = 0.0;
         $sys_time_total = 0.0;
@@ -111,6 +126,9 @@ class BenchMarker
         $child_sys_time_total = 0.0;
         $child_user_time_total = 0.0;
 
+
+        // The 5% fudge is because $n is often a few % low even for routines
+        // with stable times and avoiding extra timeIt()s is nice for accuracy's sake.
         $n = (int)($n * (1.05 * $time / $tc));
         $cnt = 0;
         while (1) {
@@ -138,7 +156,7 @@ class BenchMarker
 
             $time_total = $time_total < 0.01 ? 0.01 : $time_total;
 
-            $rate = $time / $time_total - 1;
+            $rate = $time / $time_total - 1; // Linear approximation.
             $n = (int)($rate * $n_total);
             $n = $n < $nmin ? $nmin : $n;
         }
@@ -198,6 +216,9 @@ class BenchMarker
             ) ||
             $result_time->getAllCPUTime() < $this->min_cpu
         ) {
+            // A conservative warning to spot very silly tests.
+            // Don't assume that your benchmark is ok simply because
+            // you don't get this warning!
             print "            (warning: too few iterations for a reliable count)\n";
         }
 
@@ -241,6 +262,8 @@ class BenchMarker
         $style->say(" " . implode(', ', $names));
         $style->say("...\n");
 
+        // we could save the results in an array and produce a summary here
+        // sum, min, max, avg etc etc
         foreach ($names as $name) {
             $code = $codes[$name];
             if (!is_callable($code)) {
@@ -266,6 +289,8 @@ class BenchMarker
         $rates = [];
         $titles = array_keys($results);
         foreach ($titles as $title) {
+            // The epsilon fudge here is to prevent div by 0.  Since clock
+            // resolutions are much larger, it's below the noise floor.
             $elapsed = null;
             $result = $results[$title];
             switch ($this->style_name) {
@@ -286,6 +311,8 @@ class BenchMarker
         if ($rates) {
             $_rates = $rates;
             sort($_rates);
+
+            // If more than half of the rates are greater than one...
             $display_as_rate = $_rates[(count($_rates) - 1) >> 1] > 1;
         }
 
@@ -303,6 +330,10 @@ class BenchMarker
             array_push($col_widths, strlen($column));
         }
 
+        // Build the data rows
+        // We leave the last column in even though it never has any data.  Perhaps
+        // it should go away.  Also, perhaps a style for a single column of
+        // percentages might be nice.
         foreach ($titles as $row_title) {
             $row = [];
 
@@ -312,9 +343,12 @@ class BenchMarker
                 $col_widths[0] = strlen($row_title);
             }
 
+            // We assume that we'll never get a 0 rate.
             $row_rate = $rates[$row_title];
             $rate = $display_as_rate ? $row_rate : 1 / $row_rate;
 
+            // Only give a few decimal places before switching to sci. notation,
+            // since the results aren't usually that accurate anyway.
             if ($rate >= 100) {
                 $format = "%0.0f";
             } elseif ($rate >= 10) {
@@ -457,6 +491,13 @@ class BenchMarker
             }
         };
 
+        // Wait for the user timer to tick.
+        // This makes the error range more like -0.01, +0.
+        // If we don't wait, then it's more like -0.01, +0.01.
+        // This may not seem important, but it significantly reduces the chances of
+        // getting a too low initial $count in the initial, 'find the minimum' loop
+        // in countIt(). This, in turn, can reduce the number of calls to
+        // runLoop() a lot, and thus reduce additive errors.
         $t0 = null;
         $time_base = Time::getNow()->user_time;
         while (1) {
