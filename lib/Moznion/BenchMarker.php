@@ -19,9 +19,10 @@ class BenchMarker
     private $nop_cache = [];
 
     /**
-     * @param null $style_name
-     * @param null $format
-     * @param boolean null $enable_cache
+     * Constructor method.
+     * @param String null $style_name
+     * @param String null $format
+     * @param Boolean null $enable_cache
      */
     public function __construct($style_name = null, $format = null, $enable_cache = null)
     {
@@ -45,7 +46,8 @@ class BenchMarker
     }
 
     /**
-     * @param $count
+     * Run a chunk of code and see how long it goes.
+     * @param Int $count
      * @param callable $code
      * @return Time
      */
@@ -71,7 +73,8 @@ class BenchMarker
     }
 
     /**
-     * @param $time
+     * See how many times a chunk of code runs in a given time.
+     * @param Number $time
      * @param callable $code
      * @return Time
      */
@@ -193,9 +196,10 @@ class BenchMarker
     }
 
     /**
-     * @param $count
+     * Run a chunk of code several times and print result of benchmark.
+     * @param Int $count
      * @param callable $code
-     * @param null $title
+     * @param String null $title
      * @return Time
      */
     public function timeThis($count, callable $code, $title = null)
@@ -244,10 +248,11 @@ class BenchMarker
     }
 
     /**
-     * @param $count
-     * @param array $codes
-     * @param null $quiet
-     * @return array
+     * Run several chunks of code several times and print result of benchmark.
+     * @param Int $count
+     * @param callable[] $codes
+     * @param boolean null $quiet
+     * @return Time[]
      */
     public function timeThese($count, array $codes, $quiet = null)
     {
@@ -296,9 +301,10 @@ class BenchMarker
     }
 
     /**
-     * @param $count
-     * @param array $codes
-     * @return array
+     * Print results of timeThese as a comparison chart.
+     * @param Number $count
+     * @param callable[] $codes
+     * @return String[]
      */
     public function cmpThese($count, array $codes)
     {
@@ -434,8 +440,9 @@ class BenchMarker
     }
 
     /**
+     * Print formatted time.
      * @param Time $time_result
-     * @param null $count
+     * @param Number null $count
      * @return string
      */
     public function timeStr(Time $time_result, $count = null)
@@ -484,6 +491,7 @@ class BenchMarker
     }
 
     /**
+     * Calculates difference between `$new_time` and `$old_time`.
      * @param Time $t1
      * @param Time $t2
      * @return Time
