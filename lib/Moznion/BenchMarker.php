@@ -15,11 +15,15 @@ class BenchMarker
     private $style_name;
     private $format;
 
+    private $enable_cache = false;
+    private $nop_cache = [];
+
     /**
      * @param null $style_name
      * @param null $format
+     * @param boolean null $enable_cache
      */
-    public function __construct($style_name = null, $format = null)
+    public function __construct($style_name = null, $format = null, $enable_cache = null)
     {
         $this->format = $format;
         if (is_null($this->format)) {
@@ -31,6 +35,13 @@ class BenchMarker
         }
         $this->style = Style::createStyle($style_name, $this->format);
         $this->style_name = ucfirst($style_name);
+
+        if (!is_null($enable_cache)) {
+            if (!is_bool($enable_cache)) {
+                die('$enable_cache must be boolean');
+            }
+            $this->enable_cache = $enable_cache;
+        }
     }
 
     /**
@@ -40,11 +51,18 @@ class BenchMarker
      */
     public function timeIt($count, callable $code)
     {
-        $nop = function () {
-            // NOP
-        };
+        $nop_cache_key = $count;
+        if ($this->enable_cache && array_key_exists($nop_cache_key, $this->nop_cache)) {
+            $time_nop = $this->nop_cache[$nop_cache_key];
+        } else {
+            $nop = function () {
+            }; // NOP
+            $time_nop = $this->runLoop($count, $nop);
+            // Can't let our baseline have any iterations, or they get subtracted
+            // out of the result.
+            $this->nop_cache[$nop_cache_key] = $time_nop;
+        }
 
-        $time_nop = $this->runLoop($count, $nop); // TODO cache it
         $time_code = $this->runLoop($count, $code);
 
         $result = $this->timeDiff($time_nop, $time_code);
@@ -234,7 +252,7 @@ class BenchMarker
     public function timeThese($count, array $codes, $quiet = null)
     {
         $original_style = $this->style;
-        if (! is_null($quiet)) {
+        if (!is_null($quiet)) {
             $this->style = Style::createStyle('none', $this->format);
         }
         $style = $this->style;
@@ -292,6 +310,7 @@ class BenchMarker
             // The epsilon fudge here is to prevent div by 0.  Since clock
             // resolutions are much larger, it's below the noise floor.
             $elapsed = null;
+
             $result = $results[$title];
             switch ($this->style_name) {
                 case 'nop':
@@ -472,6 +491,39 @@ class BenchMarker
     public function timeDiff(Time $t1, Time $t2)
     {
         return $t2->getDiff($t1);
+    }
+
+    /**
+     * Clear the caching of nop function which is related $count.
+     * @param Int $count
+     */
+    public function clearCache($count)
+    {
+        unset($this->nop_cache[$count]);
+    }
+
+    /**
+     * Clear all of the caching of nop function.
+     */
+    public function  clearAllCache()
+    {
+        $this->nop_cache = [];
+    }
+
+    /**
+     * Disable to cache the caching of nop function.
+     */
+    public function disableCache()
+    {
+        $this->enable_cache = false;
+    }
+
+    /**
+     * Enable to cache the caching of nop function.
+     */
+    public function enableCache()
+    {
+        $this->enable_cache = true;
     }
 
     /**
