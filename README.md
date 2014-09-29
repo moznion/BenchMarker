@@ -44,22 +44,29 @@ This library is inspired by [Benchmark of Perl](http://perldoc.perl.org/Benchmar
 Methods
 -------
 
-### `new($style_name=null, $format=null)`
+### `new($style_name=null, $format=null, $enable_cache=null)`
 
 Creates the instance of BenchMarker.
 
-- `$style_name`
+- `$style_name (String)`
 
 Specify the name of style. Default value is `auto`.
 
 Please see also [Style](https://github.com/moznion/BenchMarker#style).
 
-- `$format`
+- `$format (String)`
 
 Specify the format to format the values of benchmark's result.
 It supports the format which is compatible with `sprintf()`'s one.
 
 Default value is '5.2f'.
+
+- `$enable_cache (Boolean)`
+
+Specify cache the elapsed time of nop function (elapsed time of nop is used internal for accuracy).
+If you enable caching, processing time of benchmark will be faster.
+
+Default value is 'false'.
 
 ### `timeIt($count, $code)`
 
@@ -131,7 +138,7 @@ A zero signifies the default of 3 seconds.
 
 ### `cmpThese($count, $codes)`
 
-Print results of timethese as a comparison chart.
+Print results of timeThese as a comparison chart.
 
 - `$count`
 
@@ -162,6 +169,22 @@ Number of loops. If this argument is not null then this method appends the rate.
 Calculates difference between `$new_time` and `$old_time`.
 
 Arguments must be [instance of result-time](https://github.com/moznion/BenchMarker#result-time).
+
+### `clearCache($count)`
+
+Clear the caching of nop function which is related $count.
+
+### `clearAllCache()`
+
+Clear all of the caching of nop function.
+
+### `disableCache()`
+
+Disable to cache the caching of nop function.
+
+### `enableCache()`
+
+Enable to cache the caching of nop function.
 
 Result Time
 -----------
